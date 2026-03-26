@@ -1,71 +1,50 @@
-name: Build and deploy Python app to Azure Web App - DeployApi
+name: Deploy DeployApi
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python version
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
-      - name: Install dependencies
-        run: |
-          python -m venv antenv
-          source antenv/bin/activate
-          pip install -r backend/requirements.txt
-
-      - name: Zip artifact for deployment
-        run: |
-          cd backend
-          zip -r ../release.zip .
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: python-app
-          path: release.zip
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
     permissions:
       id-token: write
       contents: read
     steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install and zip
+        run: |
+          python -m venv antenv
+          source antenv/bin/activate
+          pip install -r backend/requirements.txt
+          cd backend
+          zip -r ../release.zip .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python-app
+          path: release.zip
+
+      - uses: actions/download-artifact@v4
         with:
           name: python-app
 
-      - name: Unzip artifact
-        run: unzip release.zip
+      - run: unzip release.zip
 
-      - name: Login to Azure
-        uses: azure/login@v2
+      - uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_1B43ACAE8B794D62893F415BB619B19A }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_6DF526539CDD4D25B1197A0B99C0419C }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_F4AD526D7E2D4BA092570E2B87CA5EDB }}
 
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
+      - uses: azure/webapps-deploy@v3
         with:
-          app-name: 'DeployApi'
-          slot-name: 'Production'
+          app-name: DeployApi
+          slot-name: Production
           package: .
-```
-
-Y en Azure → **Configuración de la pila** el comando de inicio queda:
-```
-bash /home/site/wwwroot/startup.sh
