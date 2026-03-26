@@ -18,13 +18,13 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Install and zip
+      - name: Install and zip backend only
         run: |
+          cd backend
           python -m venv antenv
           source antenv/bin/activate
-          pip install -r backend/requirements.txt
-          cd backend
-          zip -r ../release.zip .
+          pip install -r requirements.txt
+          zip -r ../release.zip . -x "*.pyc" -x "__pycache__/*"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -48,3 +48,4 @@ jobs:
           app-name: DeployApi
           slot-name: Production
           package: .
+
