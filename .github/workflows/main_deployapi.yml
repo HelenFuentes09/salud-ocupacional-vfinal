@@ -35,7 +35,7 @@ jobs:
         with:
           name: python-app
 
-      - run: unzip release.zip
+      - run: unzip -o release.zip
 
       - uses: azure/login@v2
         with:
