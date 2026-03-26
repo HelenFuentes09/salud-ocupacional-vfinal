@@ -20,7 +20,10 @@ jobs:
           python-version: '3.13'
 
       - name: Install dependencies
-        run: pip install -r backend/requirements.txt
+        run: |
+          python -m venv antenv
+          source antenv/bin/activate
+          pip install -r backend/requirements.txt
 
       - name: Zip artifact for deployment
         run: zip -r release.zip . -x "*.git*" -x "src/*" -x "node_modules/*"
