@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-
     steps:
       - uses: actions/checkout@v4
 
@@ -21,13 +20,10 @@ jobs:
           python-version: '3.13'
 
       - name: Install dependencies
-        run: |
-          cd backend
-          pip install -r requirements.txt
+        run: pip install -r backend/requirements.txt
 
       - name: Zip artifact for deployment
-        run: |
-          zip -r release.zip . -x "*.git*" -x "src/*" -x "node_modules/*" -x "*.env*"
+        run: zip -r release.zip . -x "*.git*" -x "src/*" -x "node_modules/*"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -41,7 +37,6 @@ jobs:
     permissions:
       id-token: write
       contents: read
-
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -64,8 +59,3 @@ jobs:
           app-name: 'DeployApi'
           slot-name: 'Production'
           package: .
-```
-
-Y en **Configuración de la pila** en Azure cambia el comando de inicio a:
-```
-cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
